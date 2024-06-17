@@ -1,0 +1,53 @@
+diff --color --exclude BUILD -Naur ./xnu-xnu-7195.81.3/bsd/sys/make_symbol_aliasing.sh /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/bsd/sys/make_symbol_aliasing.sh
+--- ./xnu-xnu-7195.81.3/bsd/sys/make_symbol_aliasing.sh	2021-10-05 22:41:47
++++ /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/bsd/sys/make_symbol_aliasing.sh	2024-06-12 14:45:19
+@@ -34,7 +34,7 @@
+ SDKROOT="$1"
+ OUTPUT="$2"
+ 
+-AVAILABILITY_PL="${SDKROOT}/${DRIVERKITROOT}/usr/local/libexec/availability.pl"
++AVAILABILITY_PL=$(which availability.pl)
+ 
+ if [ ! -x "${AVAILABILITY_PL}" ] ; then
+     echo "Unable to locate ${AVAILABILITY_PL} (or not executable)" >&2
+diff --color --exclude BUILD -Naur ./xnu-xnu-7195.81.3/libkern/kxld/Makefile /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/libkern/kxld/Makefile
+--- ./xnu-xnu-7195.81.3/libkern/kxld/Makefile	2021-10-05 22:41:47
++++ /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/libkern/kxld/Makefile	2024-06-12 15:44:27
+@@ -71,7 +71,8 @@
+ 
+ 
+ DEFINES = -DPRIVATE
+-CFLAGS=-std=c99 -Wall -Wextra -Werror -pedantic -Wformat=2 -Wcast-align \
++# adamd: don't error on warnings
++CFLAGS=-std=c99 -Wall -Wextra -pedantic -Wformat=2 -Wcast-align \
+ 	-Wwrite-strings -Wshorten-64-to-32 -Wshadow -Winit-self -Wpointer-arith \
+ 	-Wno-format-y2k -W -Wstrict-prototypes -Wmissing-prototypes -Wreturn-type \
+ 	-Wcast-qual -Wwrite-strings -Wswitch -Wcast-align -Wbad-function-cast \
+diff --color --exclude BUILD -Naur ./xnu-xnu-7195.81.3/makedefs/MakeInc.def /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/makedefs/MakeInc.def
+--- ./xnu-xnu-7195.81.3/makedefs/MakeInc.def	2021-10-05 22:41:47
++++ /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/makedefs/MakeInc.def	2024-06-12 15:45:32
+@@ -143,7 +143,8 @@
+ endif
+ 
+ ifeq ($(USE_WERROR),1)
+-WERROR := -Werror
++# adamd: don't error on warnings
++WERROR := 
+ endif
+ 
+ # Shared C/C++ warning flags
+diff --color --exclude BUILD -Naur ./xnu-xnu-7195.81.3/tools/xcrun_cache.sh /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/tools/xcrun_cache.sh
+--- ./xnu-xnu-7195.81.3/tools/xcrun_cache.sh	2021-10-05 22:41:47
++++ /Users/adamd/tmp/building-xnu/xnu-xnu-7195.81.3/tools/xcrun_cache.sh	2024-06-12 14:46:09
+@@ -146,9 +146,9 @@
+ 		    mkdir -p "${OBJROOT}/BuildTools/${SDKNAME}/usr/lib/system"
+ 		    rsync -aq --exclude=\*_debug.dylib --exclude=\*_profile.dylib "${SDKPROPERTY}/usr/lib/system/" "${OBJROOT}/BuildTools/${SDKNAME}/usr/lib/system/"
+ 		fi
+-		if [ -f "${SDKPROPERTY}/usr/local/libexec/availability.pl" ]; then
++		if [ -f $(which availability.pl) ]; then
+ 		    mkdir -p "${OBJROOT}/BuildTools/${SDKNAME}/usr/local/libexec"
+-		    rsync -aq "${SDKPROPERTY}/usr/local/libexec/availability.pl" "${OBJROOT}/BuildTools/${SDKNAME}/usr/local/libexec/"
++		    rsync -aq $(which availability.pl) "${OBJROOT}/BuildTools/${SDKNAME}/usr/local/libexec/"
+ 		fi
+ 		CreateFile "${SDKPROPERTY}" "${OBJROOT}/BuildTools/${SDKNAME}/.realsdkpath"
+ 		CreateFile "${SDKTYPE}" "${OBJROOT}/BuildTools/${SDKNAME}/.sdktype"
