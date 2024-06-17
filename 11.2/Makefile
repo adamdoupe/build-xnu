@@ -22,7 +22,7 @@ OUR_LIB_PATH=$(shell pwd)/include
 export PATH := $(OUR_TOOL_PATH):${PATH}
 export CPATH := $(OUR_LIB_PATH)/usr/local/include:${CPATH}
 
-default: xnudeps
+default: xnu
 xnudeps: check_tools
 xnu: check_tools
 
@@ -86,11 +86,22 @@ xnu-installhdrs: dtrace AvailabilityVersions make_lib_path xnu-fixups
 .SECONDEXPANSION:
 xnu-installhdrs: $$(xnu_src)/.src
 
-xnu: dtrace AvailabilityVersions libdispatch xnu-fixups
+xnu: xnu-x64 xnu-ARM64-T8101
+
+xnu-x64: dtrace AvailabilityVersions libdispatch xnu-fixups
 	cd $(xnu_src) && CPATH=$(OUR_LIB_PATH)/usr/local/include/kernel/ LIBRARY_PATH=$(OUR_LIB_PATH)/usr/local/lib/kernel/ make SDKROOT=macosx ARCH_CONFIGS="X86_64" KERNEL_CONFIGS="RELEASE DEVELOPMENT" PYTHON=python2
+
+xnu-ARM64-T8101: dtrace AvailabilityVersions libdispatch xnu-fixups check-kdk
+	cd $(xnu_src) && CPATH=$(OUR_LIB_PATH)/usr/local/include/kernel/ LIBRARY_PATH=$(OUR_LIB_PATH)/usr/local/lib/kernel/ make SDKROOT=macosx TARGET_CONFIGS="DEVELOPMENT ARM64 T8101" LOGCOLORS=y PYTHON=python2 KDKROOT="$(KDKROOT)" PYTHON=python2
+	cd $(xnu_src) && CPATH=$(OUR_LIB_PATH)/usr/local/include/kernel/ LIBRARY_PATH=$(OUR_LIB_PATH)/usr/local/lib/kernel/ make SDKROOT=macosx TARGET_CONFIGS="RELEASE ARM64 T8101" LOGCOLORS=y PYTHON=python2 KDKROOT="$(KDKROOT)" PYTHON=python2
+
+.PHONY: check-kdk
+check-kdk:
+	[ -d "$(KDKROOT)" ] || (echo "ERROR, must specify KDK_11.2_20D64.kdk as KDKROOT environment variable to build" && exit -1)
+
 .PHONY: xnu-fixups
 xnu-fixups: $$(xnu_src)/.src
-	patch -N -r- -p1 < xnu.patch || true
+	(find . -name "*.patch" -print0 | sort -z | xargs -t -0 -n 1 patch -N -r- -p1 -i ) || true
 
 Libsystem: ARCHS = x86_64 arm64
 libsyscall: ARCHS = x86_64 arm64
