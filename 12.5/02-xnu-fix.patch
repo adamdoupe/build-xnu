@@ -1,0 +1,13 @@
+diff --color --exclude BUILD --exclude .DS_Store -Naur ./xnu-xnu-8020.140.41/iokit/Kernel/IOBufferMemoryDescriptor.cpp /Users/adamd/src/build-xnu/12.5/xnu-xnu-8020.140.41/iokit/Kernel/IOBufferMemoryDescriptor.cpp
+--- ./xnu-xnu-8020.140.41/iokit/Kernel/IOBufferMemoryDescriptor.cpp	2022-07-19 23:09:37
++++ /Users/adamd/src/build-xnu/12.5/xnu-xnu-8020.140.41/iokit/Kernel/IOBufferMemoryDescriptor.cpp	2024-08-20 22:06:35
+@@ -332,7 +332,8 @@
+ 			    KMA_GUARD_LAST | KMA_ZERO);
+
+ 			if (((uint32_t) alignment) != alignment) {
+-				return NULL;
++				// adamd: fix to compile
++				return false;
+ 			}
+ 			if (kheap == KHEAP_DATA_BUFFERS) {
+ 				kma_flags = (kma_flags_t) (kma_flags | KMA_DATA);
